@@ -1,14 +1,13 @@
-import exithandler.SystemExitRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import exithandler.SystemExitException;
+import exithandler.SystemExitExtension;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import static exithandler.SystemExitMatcher.systemExit;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ExitWithCodeTest {
-
-    @Rule public final SystemExitRule systemExitRule = new SystemExitRule();
-    @Rule public ExpectedException exceptionRule = ExpectedException.none();
+@ExtendWith(SystemExitExtension.class)
+class ExitWithCodeTest {
 
     @Test
     public void noArgs_exitsNormally() {
@@ -18,25 +17,32 @@ public class ExitWithCodeTest {
 
     @Test
     public void argZero_exitsWithExitCodeZero() {
-        exceptionRule.expect(systemExit(0));
-        ExitWithCode.main(new String[]{"0"});
+        SystemExitException exitException = assertThrows(SystemExitException.class, () ->
+                ExitWithCode.main(new String[]{"0"})
+        );
+        assertEquals(0, exitException.getStatusCode());
     }
 
     @Test
     public void argNegative_exitsWithNegativeCode() {
-        exceptionRule.expect(systemExit(-1));
-        ExitWithCode.main(new String[]{"-1"});
+        SystemExitException exitException = assertThrows(SystemExitException.class, () ->
+            ExitWithCode.main(new String[]{"-1"})
+        );
+        assertEquals(-1, exitException.getStatusCode());
     }
 
     @Test
     public void argPositive_exitsWithPositiveCode() {
-        exceptionRule.expect(systemExit(1));
-        ExitWithCode.main(new String[]{"1"});
+        SystemExitException exitException = assertThrows(SystemExitException.class, () ->
+            ExitWithCode.main(new String[]{"1"})
+        );
+        assertEquals(1, exitException.getStatusCode());
     }
 
     @Test
     public void nonNumericArg_exitsWithException() {
-        exceptionRule.expect(NumberFormatException.class);
-        ExitWithCode.main(new String[]{"NaN"});
+        assertThrows(NumberFormatException.class, () ->
+            ExitWithCode.main(new String[]{"NaN"})
+        );
     }
 }

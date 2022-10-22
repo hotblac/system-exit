@@ -1,27 +1,28 @@
 package exithandler;
 
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
- * A JUnit 4 {@link org.junit.Rule} that handles calls to {@link System#exit(int)}.
+ * A JUnit Extension that handles calls to {@link System#exit(int)}.
  * If System.exit() is called in code under test, {@link DisallowExitSecurityManager} is thrown.
- * Without this Rule, calls to System.exit() would exit the test execution without completing remaining
+ * Without this Extension, calls to System.exit() would exit the test execution without completing remaining
  * tests in the suite and without reporting.
  */
-public class SystemExitRule extends TestWatcher {
+public class SystemExitExtension implements BeforeEachCallback, AfterEachCallback {
 
     private SecurityManager originalSecurityManager;
 
     @Override
-    protected void starting(Description description) {
+    public void beforeEach(ExtensionContext extensionContext) {
         originalSecurityManager = System.getSecurityManager();
         DisallowExitSecurityManager testSecurityManager = new DisallowExitSecurityManager(originalSecurityManager);
         System.setSecurityManager(testSecurityManager);
     }
 
     @Override
-    protected void finished(Description description) {
+    public void afterEach(ExtensionContext extensionContext) {
         System.setSecurityManager(originalSecurityManager);
     }
 }
